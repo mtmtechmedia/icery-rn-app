@@ -1,9 +1,23 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+    header: {
+        flexDirection: 'row', 
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderBottomWidth: 0.5, 
+        borderColor: '#DDDDDD', 
+    },
+    sticky: {
+        flexDirection: 'row', 
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderRightWidth: 0.5, 
+        borderColor: '#DDDDDD', 
+    },
     filterButton: {
         borderRadius: 5, 
-        backgroundColor: '#D9BF8C',
+        // backgroundColor: '#D9BF8C',
         justifyContent: 'center', 
         alignItems: 'center', 
         padding: 5,
@@ -38,6 +52,7 @@ export const styles = StyleSheet.create({
     areaAndPriceSection:{
         flexDirection: 'row',
         justifyContent: 'center',
+        alignItems: 'center',
         marginVertical: 10,
     },
     area: {
@@ -62,6 +77,7 @@ export const styles = StyleSheet.create({
         paddingHorizontal: 3, 
         marginHorizontal: 3,
         textAlign: 'center',
+        maxWidth: 150,
     },
     eventImage: {
         height: 150, 
@@ -74,7 +90,6 @@ export const modalStyle = StyleSheet.create({
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      marginVertical: 20,
     },
     modalView: {
       margin: 20,

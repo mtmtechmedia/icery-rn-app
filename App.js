@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -29,6 +29,8 @@ const App = () => {
   const [areaFilter, setAreaFilter] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [filterModalVisible, setFilterModalVisible] = useState(false);
+
+  const flatListRef = useRef()
 
   // 透過API取得資料
   const fetchData = async () => {
@@ -81,70 +83,83 @@ const App = () => {
     )
   }
 
+  const ScrollToTop = () => {
+    flatListRef.current.scrollToOffset({ animated: true, offset: 0 })
+  }
+
   const HeaderInfo = () => {
-    // 這裡因為Object.entries的關係，將資料分類成新的陣列，因此用key去印出名稱與數量 ex: ["區域", [活動]]
     return(
-      <ScrollView
-        showsHorizontalScrollIndicator={true}
-        showsVerticalScrollIndicator={false}
-        horizontal={true}
-      >
-      <View style={{flexDirection: 'row'}}>
-        <TouchableOpacity style={styles.filterButton} onPress={() => setFilterModalVisible(true)}>
-          <Text>全部</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton} onPress={() => setAreaFilter('')}>
-          <Text>重置</Text>
-        </TouchableOpacity>
+      <>
+      <View style={styles.header}>
+        <View style={styles.sticky}>
+          <TouchableOpacity style={modalStyle.buttonClose} onPress={() => setFilterModalVisible(true)}>
+            <Text>全部</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[modalStyle.buttonClose, {borderRightWidth: 0.5, borderRightColor: '#DDDDDD'}]} onPress={() => {setAreaFilter(''); ScrollToTop()}}>
+            <Text>重置</Text>
+          </TouchableOpacity>
+        </View>
 
-        {eventsGroupByArea && eventsGroupByArea.map((category, key) => {
-          return (
-            <TouchableOpacity key={key} style={styles.filterButton} onPress={() => setAreaFilter(category[0])}>
-              <Text style={styles.filterButtonText}>
-                {category[0]} ({Object.values(category)[1].length})
-              </Text>
-            </TouchableOpacity>
-          )
-        })}
-
-        <View style={modalStyle.centeredView}>
-            <Modal
-              animationType="slide"
-              transparent={true}
-              visible={filterModalVisible}
-              onRequestClose={() => setFilterModalVisible(!filterModalVisible)}>
-              <View style={modalStyle.centeredView}>
-                <View style={modalStyle.modalView}>
-                  <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center'}}>
-                    <TouchableOpacity style={modalStyle.buttonClose} onPress={() => setFilterModalVisible(!filterModalVisible)}>
-                      <Text>關閉</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.filterButton} onPress={() => setAreaFilter('')}>
-                      <Text>重置</Text>
-                    </TouchableOpacity>
-
-                    {eventsGroupByArea && eventsGroupByArea.map((category, key) => {
-                      let categoryName
-                      {/* 這裡設定未填寫活動地區的活動則跳過迴圈 */}
-                      if (category[0] === 'null' || category[0] === '') { 
-                        return false 
-                      } else {
-                        return (
-                          <TouchableOpacity key={key} style={styles.filterButton} onPress={() => {setAreaFilter(category[0]); setFilterModalVisible(!filterModalVisible)}}>
-                            <Text style={styles.filterButtonText}>
-                              {category[0]} ({Object.values(category)[1].length})
-                            </Text>
-                          </TouchableOpacity>
-                        )
-                      }
-                    })}
-                  </View>
-                </View>
-              </View>
-            </Modal>
-          </View>
+        <ScrollView
+          showsHorizontalScrollIndicator={true}
+          showsVerticalScrollIndicator={false}
+          horizontal={true}
+        >
+          {eventsGroupByArea && eventsGroupByArea.map((category, key) => {
+            return (
+              <TouchableOpacity key={key} style={[styles.filterButton, {backgroundColor: category[0] == areaFilter ? '#D9BF8C80' : '#D9BF8C'}]} 
+                onPress={() => {setAreaFilter(category[0]); ScrollToTop()}}>
+                <Text style={styles.filterButtonText}>
+                  {/* 這裡因為Object.entries的關係，將資料分類成新的陣列，因此用key去印出名稱與數量 ex: ["區域", [活動]] */}
+                  {category[0]} ({Object.values(category)[1].length}) 
+                </Text>
+              </TouchableOpacity>
+            )
+          })}
+        </ScrollView>
       </View>
-      </ScrollView>
+
+      <View style={modalStyle.centeredView}>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={filterModalVisible}
+          onRequestClose={() => setFilterModalVisible(!filterModalVisible)}>
+          <View style={modalStyle.centeredView}>
+            <View style={modalStyle.modalView}>
+              <Text>目前顯示活動地區：{areaFilter === '' ? '全部' : areaFilter}</Text>
+
+              <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center'}}>
+                <TouchableOpacity style={modalStyle.buttonClose} onPress={() => setFilterModalVisible(!filterModalVisible)}>
+                  <Text>關閉</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={modalStyle.buttonClose} onPress={() => {setAreaFilter(''); ScrollToTop(); setFilterModalVisible(!filterModalVisible)}}>
+                  <Text>重置</Text>
+                </TouchableOpacity>
+
+                {eventsGroupByArea && eventsGroupByArea.map((category, key) => {
+                  let categoryName
+                  {/* 這裡設定未填寫活動地區的活動則跳過迴圈 */}
+                  if (category[0] === 'null' || category[0] === '') { 
+                    return false 
+                  } else {
+                    return (
+                      <TouchableOpacity key={key} style={[styles.filterButton, {backgroundColor: category[0] == areaFilter ? '#D9BF8C80' : '#D9BF8C'}]} 
+                        onPress={() => {setAreaFilter(category[0]); ScrollToTop(); setFilterModalVisible(!filterModalVisible)}}
+                      >
+                        <Text style={styles.filterButtonText}>
+                          {category[0]} ({Object.values(category)[1].length})
+                        </Text>
+                      </TouchableOpacity>
+                    )
+                  }
+                })}
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
+      </>
     )
   }
 
@@ -152,6 +167,7 @@ const App = () => {
     !isLoading && 
     <SafeAreaView style={{flex: 1}}>
       <FlatList
+        ref={flatListRef}
         // 在這裡添加data filter
         data={events.filter(event => event?.Area && event?.Area.includes(areaFilter))}
         renderItem={renderEvents}
@@ -159,8 +175,10 @@ const App = () => {
         refreshing
         // nestedScrollEnabled
         // keyExtractor={item => item?.ID}
+        stickyHeaderIndices={[0]}
         ListHeaderComponent={<HeaderInfo />}
         ListEmptyComponent={<Text allowFontScaling={false}>資料讀取中... (fetching...)</Text>}
+        scrollToIndex={{animated: true, offset: 0}}
       />
     </SafeAreaView>
   );
