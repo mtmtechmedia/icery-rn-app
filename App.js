@@ -26,7 +26,7 @@ const App = () => {
   
   const [events, setEvents] = useState([]); // events初始狀態設定空array
   const [eventsGroupByArea, setEventsGroupByArea] = useState([]); // 根據區域進行分類
-  const [areaFilter, setAreaFilter] = useState(''); // 當下區域篩選
+  const [areaFilter, setAreaFilter] = useState([]); // 當下區域篩選
   const [isLoading, setIsLoading] = useState(true); // 載入狀態
   const [filterModalVisible, setFilterModalVisible] = useState(false); // 顯示全部區域的popup
 
@@ -87,6 +87,14 @@ const App = () => {
     flatListRef.current.scrollToOffset({ animated: true, offset: 0 }); // 移動到頂部的功能，因為太長而且多個地方要用就另外寫成function了
   }
 
+  const MultipleFilter = (array, areas) => {
+    let result = 0; // 計算符合數量
+    areas && areas.forEach((area) => {
+      result = result + array.includes(area); // 用includes判斷存在與否
+    });
+    return result !== 0 // 回報true / false
+  }
+
   const HeaderInfo = () => {
     return(
       <>
@@ -95,7 +103,7 @@ const App = () => {
           <TouchableOpacity style={modalStyle.buttonClose} onPress={() => setFilterModalVisible(true)}>
             <Text>全部</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[modalStyle.buttonClose, {borderRightWidth: 0.5, borderRightColor: '#DDDDDD'}]} onPress={() => {setAreaFilter(''); ScrollToTop()}}>
+          <TouchableOpacity style={[modalStyle.buttonClose, {borderRightWidth: 0.5, borderRightColor: '#DDDDDD'}]} onPress={() => {setAreaFilter([]); ScrollToTop()}}>
             <Text>重置</Text>
           </TouchableOpacity>
         </View>
@@ -105,16 +113,29 @@ const App = () => {
           showsVerticalScrollIndicator={false}
           horizontal={true}
         >
-          {eventsGroupByArea && eventsGroupByArea.map((category, key) => {
-            return (
-              <TouchableOpacity key={key} style={[styles.filterButton, {backgroundColor: category[0] == areaFilter ? '#D9BF8C80' : '#D9BF8C'}]} 
-                onPress={() => {setAreaFilter(category[0]); ScrollToTop()}}>
-                <Text style={styles.filterButtonText}>
-                  {/* 這裡因為Object.entries的關係，將資料分類成新的陣列，因此用key去印出名稱與數量 ex: ["區域", [活動]] */}
-                  {category[0]} ({Object.values(category)[1].length}) 
-                </Text>
-              </TouchableOpacity>
-            )
+          {eventsGroupByArea && eventsGroupByArea.map((areaName, key) => {
+                  console.log('areaFilter.indexOf(areaName[0])', areaFilter.indexOf(areaName[0]))
+            {/* 這裡設定未填寫活動地區的活動則跳過迴圈不印出來 */}
+            if (areaName[0] === 'null' || areaName[0] === '') { 
+              return false 
+            } else {
+              return (
+                <TouchableOpacity key={key} style={[styles.filterButton, {backgroundColor: areaFilter && areaFilter.includes(areaName[0]) ? '#D9BF8C80' : '#D9BF8C'}]} 
+                  onPress={() => {
+                    setAreaFilter(areaFilter.includes(areaName[0]) ? // 確認是否已選取
+                      // areaFilter.splice(areaFilter.indexOf(areaName[0]), 1) // 原本用這段來移除，但是splice會改變狀態，所以無法使用，改下面方式
+                      [...areaFilter.slice(0, areaFilter.indexOf(areaName[0])).concat(areaFilter.slice(areaFilter.indexOf(areaName[0]) + 1))] // 移除filter中已選取的地區
+                      : prev => [...prev, areaName[0]]); // 新增已選取地區至filter
+                    ScrollToTop();
+                  }}
+                >
+                  <Text style={styles.filterButtonText}>
+                    {/* 這裡因為Object.entries的關係，將資料分類成新的陣列，因此用key去印出名稱與數量 ex: ["區域", [活動]] */}
+                    {areaName[0]} ({Object.values(areaName)[1].length}) 
+                  </Text>
+                </TouchableOpacity>
+              )
+            }
           })}
         </ScrollView>
       </View>
@@ -127,28 +148,33 @@ const App = () => {
           onRequestClose={() => setFilterModalVisible(!filterModalVisible)}>
           <View style={modalStyle.centeredView}>
             <View style={modalStyle.modalView}>
-              <Text>目前顯示活動地區：{areaFilter === '' ? '全部' : areaFilter}</Text>
+              <Text>目前顯示活動地區：{areaFilter.length === 0 ? '未篩選' : areaFilter}</Text>
 
               <View style={{flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center'}}>
                 <TouchableOpacity style={modalStyle.buttonClose} onPress={() => setFilterModalVisible(!filterModalVisible)}>
                   <Text>關閉</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={modalStyle.buttonClose} onPress={() => {setAreaFilter(''); ScrollToTop(); setFilterModalVisible(!filterModalVisible)}}>
+                <TouchableOpacity style={modalStyle.buttonClose} onPress={() => {setAreaFilter([]); ScrollToTop()}}>
                   <Text>重置</Text>
                 </TouchableOpacity>
 
-                {eventsGroupByArea && eventsGroupByArea.map((category, key) => {
+                {eventsGroupByArea && eventsGroupByArea.map((areaName, key) => {
                   
                   {/* 這裡設定未填寫活動地區的活動則跳過迴圈不印出來 */}
-                  if (category[0] === 'null' || category[0] === '') { 
+                  if (areaName[0] === 'null' || areaName[0] === '') { 
                     return false 
                   } else {
                     return (
-                      <TouchableOpacity key={key} style={[styles.filterButton, {backgroundColor: category[0] == areaFilter ? '#D9BF8C80' : '#D9BF8C'}]} 
-                        onPress={() => {setAreaFilter(category[0]); ScrollToTop(); setFilterModalVisible(!filterModalVisible)}}
+                      <TouchableOpacity key={key} style={[styles.filterButton, {backgroundColor: areaFilter && areaFilter.includes(areaName[0]) ? '#D9BF8C80' : '#D9BF8C'}]} 
+                        onPress={() => {
+                          setAreaFilter(areaFilter.includes(areaName[0]) ? // 確認是否已選取
+                            [...areaFilter.slice(0, areaFilter.indexOf(areaName[0])).concat(areaFilter.slice(areaFilter.indexOf(areaName[0]) + 1))] // 移除filter中已選取的地區
+                            : prev => [...prev, areaName[0]]); // 新增已選取地區至filter
+                          ScrollToTop();
+                        }}
                       >
                         <Text style={styles.filterButtonText}>
-                          {category[0]} ({Object.values(category)[1].length})
+                          {areaName[0]} ({Object.values(areaName)[1].length})
                         </Text>
                       </TouchableOpacity>
                     )
@@ -169,13 +195,13 @@ const App = () => {
       <FlatList
         ref={flatListRef}
         // 在這裡添加data filter
-        data={events.filter(event => event?.Area && event?.Area.includes(areaFilter))}
+        data={areaFilter.length === 0 ? events : events.filter(event => event?.Area && MultipleFilter(event?.Area, areaFilter))}
         renderItem={renderEvents}
         progressViewOffset={50}
         refreshing
         stickyHeaderIndices={[0]}
         ListHeaderComponent={<HeaderInfo />}
-        ListEmptyComponent={<Text allowFontScaling={false}>資料讀取中... (fetching...)</Text>}
+        ListEmptyComponent={<Text allowFontScaling={false}>資料讀取中...</Text>}
       />
     </SafeAreaView>
   );
