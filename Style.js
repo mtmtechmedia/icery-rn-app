@@ -36,6 +36,7 @@ export const styles = StyleSheet.create({
     title: {
         fontSize: 15,
         fontWeight: 'bold',
+        textAlign: 'justify',
     },
     time: {
         fontSize: 13,
