@@ -130,3 +130,20 @@ export const modalStyle = StyleSheet.create({
       textAlign: 'center',
     },
 });
+
+export const eventContent = StyleSheet.create({
+    section: {
+        padding: 10,
+        marginVertical: 5,
+        borderRadius: 10,
+        backgroundColor: '#DDDDDD',
+    },
+    title: {
+        fontSize: 18,
+        textAlign: 'justify',
+    },
+    content: {
+        fontSize: 13,
+        textAlign: 'justify',
+    },
+})
