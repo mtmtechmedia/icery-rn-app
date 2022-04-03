@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     header: {
-        flexDirection: 'row', 
+        paddingHorizontal: 5,
         justifyContent: 'center',
         backgroundColor: 'white',
         borderBottomWidth: 0.5, 
@@ -14,6 +14,14 @@ export const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRightWidth: 0.5, 
         borderColor: '#DDDDDD', 
+    },
+    input: {
+        borderWidth: 0.5,
+        padding: 0,
+        paddingHorizontal: 10,
+        marginHorizontal: 10,
+        height: 30,
+        fontSize: 13,
     },
     filterButton: {
         borderRadius: 5, 
@@ -137,6 +145,13 @@ export const eventContent = StyleSheet.create({
         marginVertical: 5,
         borderRadius: 10,
         backgroundColor: '#DDDDDD',
+    },
+    hint: {
+        fontSize: 18, 
+        fontWeight: 'bold', 
+        marginTop: 10, 
+        borderBottomWidth: 0.5, 
+        borderBottomColor: 'black',
     },
     title: {
         fontSize: 18,
