@@ -33,18 +33,21 @@ const Events = ({navigation}) => {
     // let usedData = MINI_DATA
 
     setEvents(usedData); // 設定資料
-    let grouped = groupBy(usedData, 'Area'); // 根據Area這個key進行分類
-    setEventsGroupByArea(grouped); // 根據區域進行分類，另外存一個useState
+    let grouped = groupBy(usedData); // Call groupBy function來進行分類
+    setEventsGroupByArea(grouped); // 根據分類新產生的結果，另外存一個useState
 
     setIsLoading(false); // 完成資料fetching後解除loading狀態
-  };
+  }
 
-  const groupBy = (eventsData) => { // 取代lodash的groupBy功能
+  const groupBy = (eventsData) => { // 取代lodash的groupBy功能進行活動地區分類及計算數量
     return eventsData.reduce((allEvent, currentEvent) => { // (整筆活動資料(events), 當下單筆活動資料(event))
-      (allEvent[currentEvent?.Area] = allEvent[currentEvent?.Area] || []).push(currentEvent) // 重組單個活動區域為新陣列 中正區Array: [{活動Object 1}, {活動Object 2}]}
-      return allEvent // 最後組成Object return，資料格式為 Object {"單個活動區域 a": [{活動Object a1}, {活動Object a2}], "單個活動區域 b": [{活動Object b1}, {活動Object b2}]}
+      if (!allEvent.hasOwnProperty(currentEvent?.Area) || isNaN(allEvent[currentEvent?.Area])) { // 確認該活動地區是否已經開始計算數量
+        allEvent[currentEvent?.Area] = 0; // 若尚未開始計算則將該活動地區的值初始化為Number 0
+      }
+      allEvent[currentEvent?.Area]++; // 每一筆活動都針對該活動地區進行+1計算
+      return allEvent; // 最終得出資料格式為 Object {"中正區": 195, "信義區": 37}
     }, {});
-  };
+  }
 
   const MultipleFilter = (eventObject, areas) => {
     let areaIncluded = false; // 預設不符合
@@ -86,7 +89,7 @@ const Events = ({navigation}) => {
           >
             {eventsGroupByArea && Object.keys(eventsGroupByArea).map((areaName, key) => { // 單筆map資料形式 ex:(中正區, index)
               // 這裡設定未填寫活動地區的活動則跳過迴圈不印出來
-              if (areaName?.Area === 'null' || areaName?.Area === '') { // 判斷活動地區名稱是否非法
+              if (areaName === 'null' || areaName === '') { // 判斷活動地區名稱是否非法
                 return false // 不處理非法活動地區之活動
               } else {
                 return (
@@ -100,7 +103,7 @@ const Events = ({navigation}) => {
                   >
                     <Text style={styles.filterButtonText}>
                       {/* 資料形式 ex: 中正區 (中正區活動數量) */}
-                      {areaName} ({eventsGroupByArea[areaName].length}) 
+                      {areaName} ({eventsGroupByArea[areaName]}) 
                     </Text>
                   </TouchableOpacity>
                 )
@@ -141,7 +144,7 @@ const Events = ({navigation}) => {
 
                 {eventsGroupByArea && Object.keys(eventsGroupByArea).map((areaName, key) => { // 單筆map資料形式 ex:(中正區, index)
                   // 這裡設定未填寫活動地區的活動則跳過迴圈不印出來
-                  if (areaName?.Area === 'null' || areaName?.Area === '') { // 判斷活動地區名稱是否非法
+                  if (areaName === 'null' || areaName === '') { // 判斷活動地區名稱是否非法
                     return false // 不處理非法活動地區之活動
                   } else {
                     return (
@@ -155,7 +158,7 @@ const Events = ({navigation}) => {
                       >
                         <Text style={styles.filterButtonText}>
                           {/* 資料形式 ex: 中正區 (中正區活動數量) */}
-                          {areaName} ({eventsGroupByArea[areaName].length}) 
+                          {areaName} ({eventsGroupByArea[areaName]}) 
                         </Text>
                       </TouchableOpacity>
                     )

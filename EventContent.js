@@ -19,7 +19,7 @@ function EventContent({ navigation, route }) {
 			vertical={true}
             stickyHeaderIndices={[0]}
 		>
-            <TouchableOpacity activeOpacity={1} onPress={() => { navigation.goBack()}}>
+            <TouchableOpacity activeOpacity={1} onPress={() => {navigation.goBack()}}>
                 <View style={{borderBottomWidth: 0.5, borderBottomColor: '#00000020', backgroundColor: 'white'}}>
                     <Text allowFontScaling={false} style={{fontSize: 18, padding: 5, fontWeight: 'bold'}}>返回</Text>
                 </View>
